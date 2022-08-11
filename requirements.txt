@@ -1,0 +1,14 @@
+flask
+flask_cors
+flask_restful
+flask-apispec
+requests
+
+## Calulcations
+python-time
+hmac
+pandas
+numpy
+
+## Flask env
+python-dotenv
