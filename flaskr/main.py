@@ -1,5 +1,9 @@
 from flask import Flask
 from flask_restful import Resource, Api
+from flask_apispec import marshal_with
+from flask_apispec import use_kwargs
+from marshmallow import fields
+from marshmallow import Schema
 
 from re import A
 import time
@@ -24,6 +28,11 @@ class Account():
         except Exception as e:
             print('Error adding api keys')
         return
+
+class GetRequestSchema(Schema):
+    apiKey = fields.String(default="")
+    apiSecret = fields.String(default="")
+    walletAssets = fields.List(fields.String())
 
 
 arraydata = (
@@ -61,11 +70,12 @@ def getAccountFills(api_key, api_secret):  # take in array instead?
 
     s = Session()
     response = s.send(prepared).json()
+    # print(response)
 
     data = pd.DataFrame(response['result'])
     # print(data)
     # what are the unique mkts going throguh transactions
-    print((data['baseCurrency']+'/'+data['quoteCurrency']).unique())
+    # print((data['baseCurrency']+'/'+data['quoteCurrency']).unique())
     walletData = pd.DataFrame(arraydata)
     walletDataNoUSD = walletData[walletData['assetName'] != 'USD']
    # a = data[['baseCurrency','quoteCurrency']].isin(walletData['assetName'])
@@ -80,7 +90,7 @@ def getAccountFills(api_key, api_secret):  # take in array instead?
 
     walletDataMerged['joined_pairs'] = walletDataMerged['baseCurrency'] + \
         '/'+walletDataMerged['quoteCurrency']
-    print(walletDataMerged)
+    # print(walletDataMerged)
     values = sumOf(walletDataMerged)
     valuesSum = values.sum()
     valuesSum['avgPrice'] = valuesSum['total_value']/valuesSum['token_qty']
@@ -94,7 +104,7 @@ def getAccountFills(api_key, api_secret):  # take in array instead?
                                              == 'buy']['size'] - valuesSum['token_qty']
     valuesSum['avgPrice'] = valuesSum['finalPriceSpent'] / \
         valuesSum['finalQtyBought']
-    print([values['symbol'][0], valuesSum['avgPrice']])
+    # print([values['symbol'][0], valuesSum['avgPrice']])
     returnList = []
     returnList.append(values['symbol'][0])
     for i in valuesSum['avgPrice']:
@@ -107,12 +117,21 @@ app = Flask(__name__)
 api = Api(app)
 
 class FtxApi(Resource):
-    def get(self):
+    @use_kwargs(GetRequestSchema,location=("json"))
+    def get(self, **kwargs):
         user_account = Account()
         # input("Please input FTX API Key:\n")
-        user_account.api_key = '75NiLlEDxj_OABVWi_xPxb2FODoOwyCddSM_K7vq'
+        # user_account.api_key = 'oAPx_C46gtKj-IzaOY0LK_p7t_p75kREBCLngATk'
         # input("Please input FTX API Secret:\n")
-        user_account.api_secret = 'mEcLhlmkr0gEx0qv-V4eWFQRBqMMF_Xv520xR7ct'
+        # user_account.api_secret = 'WhRV3Ypxa08bsH_qF8w8iuVhcC-bGPbATwOK12h5'
+
+        apiKey = kwargs.get("apiKey")
+        apiSecret = kwargs.get("apiSecret")
+        print("This is api Key " + apiKey)
+        print("This is api secret " + apiSecret)
+        user_account.api_key = apiKey
+        user_account.api_secret = apiSecret
+
         main_values = getAccountFills(
             user_account.api_key, user_account.api_secret)
         return {"key": main_values}
