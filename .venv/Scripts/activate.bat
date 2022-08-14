@@ -8,7 +8,7 @@ if defined _OLD_CODEPAGE (
     "%SystemRoot%\System32\chcp.com" 65001 > nul
 )
 
-set VIRTUAL_ENV=C:\Users\rilwa\OneDrive\Desktop\Solana_Summer_Camp\python_backend\.venv
+set VIRTUAL_ENV=C:\Users\natalie\Documents\TableFi\TableFi_python_be\.venv
 
 if not defined PROMPT set PROMPT=$P$G
 
@@ -25,6 +25,7 @@ if defined _OLD_VIRTUAL_PATH set PATH=%_OLD_VIRTUAL_PATH%
 if not defined _OLD_VIRTUAL_PATH set _OLD_VIRTUAL_PATH=%PATH%
 
 set PATH=%VIRTUAL_ENV%\Scripts;%PATH%
+set VIRTUAL_ENV_PROMPT=(.venv) 
 
 :END
 if defined _OLD_CODEPAGE (

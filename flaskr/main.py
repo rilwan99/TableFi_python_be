@@ -105,13 +105,16 @@ def getAccountFills(api_key, api_secret):  # take in array instead?
     valuesSum['avgPrice'] = valuesSum['finalPriceSpent'] / \
         valuesSum['finalQtyBought']
     # print([values['symbol'][0], valuesSum['avgPrice']])
-    returnList = []
-    returnList.append(values['symbol'][0])
-    for i in valuesSum['avgPrice']:
-        returnList.append(i)
-
-    # return [values['symbol'][0], valuesSum['avgPrice']]
-    return returnList
+    returnDict ={}
+    returnDict = {walletData['assetName'][i]:  "-" for i in range(len(walletData['assetName']))}
+    a = valuesSum['avgPrice'].iloc[0]
+    resultDict = {values['symbol'][0]: a} #hardcoded-ish
+    for k, v in returnDict.items():
+        if k in resultDict:
+            returnDict[k] = resultDict.get(k)
+    #print(returnDict) 
+    return returnDict
+    #return returnList
 
 app = Flask(__name__)
 api = Api(app)
