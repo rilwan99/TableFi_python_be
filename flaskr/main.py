@@ -1,3 +1,4 @@
+import json
 from flask import Flask
 from flask_restful import Resource, Api
 from flask_apispec import marshal_with
@@ -15,6 +16,7 @@ import numpy as np
 # from flaskr.schema.account import Account
 # from flaskr.logic.functions import getAccountFills
 
+
 class Account():
     def __init__(self):  # empty initialization
         self.id = []
@@ -29,20 +31,20 @@ class Account():
             print('Error adding api keys')
         return
 
+
 class GetRequestSchema(Schema):
     apiKey = fields.String(default="")
     apiSecret = fields.String(default="")
-    walletAssets = fields.List(fields.String())
 
 
-arraydata = (
+arraydata = [
     {'assetName': "USD", 'balance': 7.7e-7, 'price': 1.0098591276623377,
         'symbol': "USD", 'value': 7.775915283e-7},
     {'assetName': "FTT", 'balance': 0.099734, 'price': 31.445,
         'symbol': "FTT", 'value': 3.13613563},
     {'assetName': "TRX", 'balance': 0.000003, 'price': 0.0703873,
         'symbol': "TRX", 'value': 2.111619e-7},
-)
+]
 
 
 def sumOf(df):
@@ -105,22 +107,25 @@ def getAccountFills(api_key, api_secret):  # take in array instead?
     valuesSum['avgPrice'] = valuesSum['finalPriceSpent'] / \
         valuesSum['finalQtyBought']
     # print([values['symbol'][0], valuesSum['avgPrice']])
-    returnDict ={}
-    returnDict = {walletData['assetName'][i]:  "-" for i in range(len(walletData['assetName']))}
+    returnDict = []
+    returnDict = {walletData['assetName'][i]
+        :  "-" for i in range(len(walletData['assetName']))}
     a = valuesSum['avgPrice'].iloc[0]
-    resultDict = {values['symbol'][0]: a} #hardcoded-ish
+    resultDict = {values['symbol'][0]: a}  # hardcoded-ish
     for k, v in returnDict.items():
         if k in resultDict:
             returnDict[k] = resultDict.get(k)
-    #print(returnDict) 
+    # print(returnDict)
     return returnDict
-    #return returnList
+    # return returnList
+
 
 app = Flask(__name__)
 api = Api(app)
 
+
 class FtxApi(Resource):
-    @use_kwargs(GetRequestSchema,location=("json"))
+    @use_kwargs(GetRequestSchema, location=("json"))
     def get(self, **kwargs):
         user_account = Account()
         # input("Please input FTX API Key:\n")
@@ -130,14 +135,12 @@ class FtxApi(Resource):
 
         apiKey = kwargs.get("apiKey")
         apiSecret = kwargs.get("apiSecret")
-        print("This is api Key " + apiKey)
-        print("This is api secret " + apiSecret)
         user_account.api_key = apiKey
         user_account.api_secret = apiSecret
 
         main_values = getAccountFills(
             user_account.api_key, user_account.api_secret)
-        return {"key": main_values}
+        return main_values
 
 
 api.add_resource(FtxApi, '/')
