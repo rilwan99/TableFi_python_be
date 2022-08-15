@@ -107,6 +107,7 @@ def getAccountFills(api_key, api_secret):  # take in array instead?
     valuesSum['avgPrice'] = valuesSum['finalPriceSpent'] / \
         valuesSum['finalQtyBought']
     # print([values['symbol'][0], valuesSum['avgPrice']])
+
     returnDict = []
     returnDict = {walletData['assetName'][i]
         :  "-" for i in range(len(walletData['assetName']))}
