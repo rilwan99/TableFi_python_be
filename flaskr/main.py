@@ -82,43 +82,23 @@ def getAccountFills(api_key, api_secret):  # take in array instead?
     walletDataNoUSD = walletData[walletData['assetName'] != 'USD']
    # a = data[['baseCurrency','quoteCurrency']].isin(walletData['assetName'])
 
-    # take records that are matched with what is currently in the wallet
+    test = pd.DataFrame()
     walletDataOnly = data.merge(
         walletDataNoUSD, how='inner', left_on='baseCurrency', right_on='assetName')
-    walletDataOnly2 = data.merge(
-        walletDataNoUSD, how='inner', left_on='quoteCurrency', right_on='assetName')
-    walletDataMerged = walletDataOnly.append(
-        walletDataOnly2, ignore_index=False)
-
-    walletDataMerged['joined_pairs'] = walletDataMerged['baseCurrency'] + \
-        '/'+walletDataMerged['quoteCurrency']
-    # print(walletDataMerged)
-    values = sumOf(walletDataMerged)
-    valuesSum = values.sum()
-    valuesSum['avgPrice'] = valuesSum['total_value']/valuesSum['token_qty']
-    if valuesSum['total_value'] > 0:
-        # valuesSum['finalPriceSpent']=values[values['side']=='buy'].sum()#+valuesSum['total_value']
-        valuesSum['finalPriceSpent'] = values[values['side'] ==
-                                              'buy']['total_value'] * -1 - valuesSum['total_value']
-        # print(valuesSum['finalPriceSpent'])
-    if valuesSum['token_qty'] > 0:
-        valuesSum['finalQtyBought'] = values[values['side']
-                                             == 'buy']['size'] - valuesSum['token_qty']
-    valuesSum['avgPrice'] = valuesSum['finalPriceSpent'] / \
-        valuesSum['finalQtyBought']
-    # print([values['symbol'][0], valuesSum['avgPrice']])
-
-    returnDict = []
-    returnDict = {walletData['assetName'][i]
-        :  "-" for i in range(len(walletData['assetName']))}
-    a = valuesSum['avgPrice'].iloc[0]
-    resultDict = {values['symbol'][0]: a}  # hardcoded-ish
-    for k, v in returnDict.items():
-        if k in resultDict:
-            returnDict[k] = resultDict.get(k)
-    # print(returnDict)
+    test = walletDataOnly[walletDataOnly['side']=='buy']
+    getUniqueSymbol = test['symbol'].unique()
+    totalSpent = []
+    totalQty = []
+    for idx, i in enumerate(getUniqueSymbol):
+        a = test[test['symbol']==i]
+        print((a['price_x']*a['size']).sum())
+        totalSpent.append((a['price_x']*a['size']).sum())
+        totalQty.append(a['size'].sum())
+    avgEntryPrice = [i / j for i, j in zip(totalSpent, totalQty)]
+    returnDict = {walletData['assetName'][i]:  "-" for i in range(len(walletData['assetName']))}
+    resultDict = {getUniqueSymbol[i]: avgEntryPrice[i] for i in range(len(getUniqueSymbol))}
+    #print(resultDict)
     return returnDict
-    # return returnList
 
 
 app = Flask(__name__)
