@@ -56,7 +56,7 @@ def sumOf(df):
     return df
 
 
-def getAccountFills(api_key, api_secret):  # take in array instead?
+def getAccountFills(api_key, api_secret):  #due to time constraint, will only calculate orders where USD is used to buy the token.
     # take in array from previous api call
     ######################################################
     ts = int(time.time() * 1000)
